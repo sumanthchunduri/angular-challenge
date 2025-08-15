@@ -1,0 +1,47 @@
+<div class="container">
+  <div class="header">
+    <h1>Cron Expression Parser & Visualizer</h1>
+    <p>Parse and visualize cron expressions</p>
+  </div>
+
+  <div class="input-section">
+    <div class="input-group">
+      <label for="cronInput">Cron Expression:</label>
+      <input
+        type="text"
+        id="cronInput"
+        [formControl]="cronControl"
+        [class.error]="!isValid"
+        placeholder="Enter cron expression (e.g., 0 30 9 * * MON-FRI)"
+        class="cron-input"
+      />
+    </div>
+
+    <div class="status" [ngClass]="{ valid: isValid, invalid: !isValid }">
+      <span class="status-icon">{{ isValid ? '✓' : '⚠' }}</span>
+      <span>{{ isValid ? 'Valid cron expression' : errorMessage }}</span>
+    </div>
+  </div>
+
+  @if (isValid && parsedData) {
+    <div class="results">
+    <div class="human-readable">
+        <h3>Human Readable Schedule</h3>
+        <p>{{ getHumanReadableSchedule() }}</p>
+    </div>
+
+    <div class="next-runs">
+        <h4>Next 5 Scheduled Runs</h4>
+        @for (run of getNextRuns(); track $index) {
+        <div class="run-item">
+            {{ run }}
+        </div>
+        }
+    </div>
+    </div>
+  }
+
+  @if (!isValid && errorMessage) {
+  <div class="error-message"><strong>Error:</strong> {{ errorMessage }}</div>
+  }
+</div>

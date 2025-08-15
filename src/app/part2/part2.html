@@ -1,0 +1,221 @@
+<div class="container">
+  <div class="header">
+    <h1>Recurrence Pattern Generator</h1>
+  </div>
+
+  <div class="form-container">
+    <form [formGroup]="recurrenceForm" (ngSubmit)="generatePattern()">
+      <div class="form-section">
+        <h3>Pattern Type</h3>
+        <div class="pattern-selector">
+          <label class="pattern-option" [class.active]="selectedPattern === 'daily'">
+            <input
+              type="radio"
+              value="daily"
+              formControlName="patternType"
+              (change)="onPatternChange('daily')"
+            />
+            <div class="pattern-card">
+              <span class="pattern-icon">📅</span>
+              <span class="pattern-title">Daily</span>
+              <span class="pattern-desc">Every day at specific time</span>
+            </div>
+          </label>
+
+          <label class="pattern-option" [class.active]="selectedPattern === 'weekly'">
+            <input
+              type="radio"
+              value="weekly"
+              formControlName="patternType"
+              (change)="onPatternChange('weekly')"
+            />
+            <div class="pattern-card">
+              <span class="pattern-icon">📊</span>
+              <span class="pattern-title">Weekly</span>
+              <span class="pattern-desc">Specific days of the week</span>
+            </div>
+          </label>
+
+          <label class="pattern-option" [class.active]="selectedPattern === 'monthly'">
+            <input
+              type="radio"
+              value="monthly"
+              formControlName="patternType"
+              (change)="onPatternChange('monthly')"
+            />
+            <div class="pattern-card">
+              <span class="pattern-icon">🗓️</span>
+              <span class="pattern-title">Monthly</span>
+              <span class="pattern-desc">Specific date each month</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Dynamic Form Content -->
+      <div class="form-section" *ngIf="selectedPattern">
+        <!-- Daily Pattern -->
+        <div *ngIf="selectedPattern === 'daily'" class="pattern-form">
+          <h3>⏰ Daily Schedule</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dailyTime">Time</label>
+              <input type="time" id="dailyTime" formControlName="time" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="dailyInterval">Every X Days</label>
+              <select id="dailyInterval" formControlName="interval" class="form-control">
+                <option value="1">Every Day</option>
+                <option value="2">Every 2 Days</option>
+                <option value="3">Every 3 Days</option>
+                <option value="7">Every Week</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weekly Pattern -->
+        <div *ngIf="selectedPattern === 'weekly'" class="pattern-form">
+          <h3>📆 Weekly Schedule</h3>
+
+          <div class="form-group">
+            <label>Select Days</label>
+            <div class="days-selector">
+              <label
+                *ngFor="let day of weekDays"
+                class="day-checkbox"
+                [class.selected]="isWeeklyDaySelected(day.value)"
+              >
+                <input
+                  type="checkbox"
+                  [value]="day.value"
+                  (change)="onWeeklyDayChange(day.value, $event)"
+                />
+                <span class="day-name">{{ day.short }}</span>
+                <span class="day-full">{{ day.name }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="weeklyTime">Time</label>
+              <input type="time" id="weeklyTime" formControlName="time" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="weeklyInterval">Every X Weeks</label>
+              <select id="weeklyInterval" formControlName="interval" class="form-control">
+                <option value="1">Every Week</option>
+                <option value="2">Every 2 Weeks</option>
+                <option value="3">Every 3 Weeks</option>
+                <option value="4">Every 4 Weeks</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monthly Pattern -->
+        <div *ngIf="selectedPattern === 'monthly'" class="pattern-form">
+          <h3>🗓️ Monthly Schedule</h3>
+
+          <div class="form-group">
+            <label>Select Date</label>
+            <div class="date-selector">
+              <label
+                *ngFor="let date of monthlyDates"
+                class="date-option"
+                [class.selected]="selectedMonthlyDate === date"
+              >
+                <input
+                  type="radio"
+                  [value]="date"
+                  formControlName="monthlyDate"
+                  (change)="onMonthlyDateChange(date)"
+                />
+                <span>{{ date }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="monthlyTime">Time</label>
+              <input type="time" id="monthlyTime" formControlName="time" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="monthlyInterval">Every X Months</label>
+              <select id="monthlyInterval" formControlName="interval" class="form-control">
+                <option value="1">Every Month</option>
+                <option value="2">Every 2 Months</option>
+                <option value="3">Every 3 Months</option>
+                <option value="6">Every 6 Months</option>
+                <option value="12">Every Year</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section" *ngIf="selectedPattern">
+        <button type="submit" class="generate-btn" [disabled]="!recurrenceForm.valid">
+          Generate Recurrence Pattern
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="results-container" *ngIf="generatedSchedule">
+    <div class="result-card">
+      <div class="result-header">
+        <h3>Generated Pattern</h3>
+      </div>
+      <div class="result-content">
+        <div class="pattern-summary">
+          <div class="summary-item">
+            <strong>Type:</strong>
+            <span class="pattern-badge pattern-{{ generatedSchedule.pattern.type }}">
+              {{ generatedSchedule.pattern.type | titlecase }}
+            </span>
+          </div>
+
+          <div class="summary-item">
+            <strong>Description:</strong>
+            <span>{{ generatedSchedule.description }}</span>
+          </div>
+
+          <div class="summary-item">
+            <strong>Cron Expression:</strong>
+            <code class="cron-expression">{{ generatedSchedule.cronExpression }}</code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-card">
+      <div class="result-header">
+        <h3>Schedule Preview</h3>
+      </div>
+      <div class="result-content">
+        <div class="schedule-grid">
+          <div
+            *ngFor="let run of generatedSchedule.nextRuns; let i = index"
+            class="schedule-item"
+            [class.first]="i === 0"
+          >
+            <div class="schedule-date">
+              {{ run | date : 'EEEE, MMM d, yyyy' }}
+            </div>
+            <div class="schedule-time">
+              {{ run | date : 'h:mm a' }}
+            </div>
+            <div class="schedule-relative" *ngIf="i === 0">Next Run</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
